@@ -39,6 +39,7 @@ const (
 var (
 	authVerifyClientRegex = regexp.MustCompile(`on|off|optional|optional_no_ca`)
 	authOCSPRegex         = regexp.MustCompile(`on|off|leaf`)
+	httpOnlyRegex         = regexp.MustCompile(`^http?://`)
 )
 
 // Config contains the AuthSSLCert used for mutual authentication
@@ -150,7 +151,7 @@ func (a authTLS) Parse(ing *networking.Ingress) (interface{}, error) {
 	}
 
 	config.OCSPResponder, err = parser.GetStringAnnotation("auth-tls-ocsp-responder", ing)
-	if err != nil {
+	if err != nil || !httpOnlyRegex.MatchString(config.OCSPResponder) {
 		config.OCSPResponder = ""
 	}
 
